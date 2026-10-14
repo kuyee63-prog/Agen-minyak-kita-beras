@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Agen Minyak dan Beras — Katalog Partai</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#1b2b1b;color:#111;min-height:100vh;display:flex;justify-content:center}
+.phone{width:100%;max-width:430px;min-height:100vh;background:#f7faf7;position:relative;padding-bottom:90px}
+.b-hero{background:linear-gradient(135deg,#2e7d32,#66bb6a);color:#fff;padding:26px 18px 20px;border-radius:0 0 24px 24px;text-align:center}
+.b-hero h1{font-size:24px;margin-bottom:4px}
+.b-hero p{font-size:13px;opacity:.9}
+.b-sec{padding:14px 14px 0}
+.b-sec h2{font-size:15px;margin-bottom:8px;color:#2e7d32}
+.b-item{background:#fff;border-radius:14px;padding:12px;display:flex;gap:12px;margin-bottom:10px;box-shadow:0 2px 8px rgba(46,125,50,.1);align-items:center}
+.b-emoji{font-size:36px;flex-shrink:0}
+.b-info{flex:1}
+.b-info h3{font-size:14px;margin-bottom:2px;color:#111}
+.b-info p{font-size:12px;color:#666;margin-bottom:4px}
+.b-price{font-weight:800;color:#c62828;font-size:15px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:34px;height:34px;border-radius:50%;border:2px solid #2e7d32;background:#fff;font-size:18px;font-weight:800;color:#2e7d32;cursor:pointer}
+.stepper button:active{background:#2e7d32;color:#fff}
+.stepper span{font-weight:800;min-width:22px;text-align:center;font-size:16px}
+.cartbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#2e7d32;padding:12px 16px;display:none;justify-content:space-between;align-items:center;z-index:40}
+.cartbar.show{display:flex}
+.cartbar .cinfo{color:#fff;font-size:14px}
+.cartbar .cinfo b{color:#ffeb3b}
+.cartbar button{background:#ffeb3b;border:none;padding:12px 22px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;color:#1b2b1b}
+.modal{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:100%;background:rgba(0,0,0,.6);display:none;z-index:60;align-items:flex-end}
+.modal.show{display:flex}
+.sheet{background:#f7faf7;width:100%;border-radius:24px 24px 0 0;padding:22px 18px;max-height:85%;overflow-y:auto}
+.sheet h2{font-size:18px;margin-bottom:14px;color:#111}
+.sheet label{font-size:13px;font-weight:700;display:block;margin:10px 0 4px;color:#111}
+.sheet input{width:100%;padding:12px;border:2px solid #c8e6c9;border-radius:12px;font-size:15px;background:#fff;color:#111}
+.orderbtn{width:100%;background:#25d366;color:#fff;border:none;padding:15px;border-radius:14px;font-size:16px;font-weight:800;margin-top:16px;cursor:pointer}
+.note{text-align:center;font-size:11px;color:#888;padding:14px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="b-hero">
+    <h1>🌾 Agen Minyak dan Beras</h1>
+    <p>Partai Dus & Karungan • Kibin, Serang</p>
+  </div>
+  <div class="b-sec">
+    <h2>🛒 Katalog</h2>
+    <div id="menuSec"></div>
+  </div>
+  <p class="note">Harga dapat berubah sewaktu-waktu.<br>Pesan via WhatsApp 👇</p>
+</div>
+
+<div class="cartbar" id="cartbar">
+  <div class="cinfo"><b id="cartCount">0</b> item • <b id="cartTotal">Rp0</b></div>
+  <button onclick="openCheckout()">Pesan via WA →</button>
+</div>
+
+<div class="modal" id="checkoutModal">
+  <div class="sheet">
+    <h2>🧾 Konfirmasi Pesanan</h2>
+    <div id="checkoutItems" style="font-size:13px;margin-bottom:6px;color:#111"></div>
+    <div style="font-weight:800;font-size:16px;margin-bottom:6px;color:#111">Total: <span id="checkoutTotal" style="color:#c62828"></span></div>
+    <label>Nama kamu</label>
+    <input id="buyerName" placeholder="cth: Budi">
+    <label>Catatan (opsional)</label>
+    <input id="buyerNote" placeholder="cth: antar ke rumah">
+    <button class="orderbtn" onclick="placeOrder()">📲 Kirim Pesanan via WhatsApp</button>
+    <button onclick="closeCheckout()" style="width:100%;background:none;border:none;padding:12px;color:#888;font-size:14px;cursor:pointer">← Kembali</button>
+  </div>
+</div>
+
+<script>
+/* ===== KONFIG — UBAH HARGA VIA GOOGLE SHEET ===== */
+const SHEET_ID='1xnrIYLE9u0AWeGjwla_4xQM0G6A4zxEQG5pvapUUUOs';
+const WA_NUMBER='6285183030293';
+const FALLBACK_MENU=[
+ {id:1,emoji:'🫗',name:'Minyak Kita 1 Dus (12x1L)',desc:'Minyak goreng rakyat',price:210000,unit:'dus'},
+ {id:2,emoji:'🍚',name:'Beras Premium 5 Kg',desc:'Pulen, bersih',price:68000,unit:'karung'},
+ {id:3,emoji:'🍚',name:'Beras Premium 10 Kg',desc:'Pulen, bersih, hemat',price:132000,unit:'karung'},
+];
+let MENU=FALLBACK_MENU.slice();
+async function loadMenu(){
+ if(!SHEET_ID) return;
+ try{
+  const r=await fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&headers=1&t='+Date.now());
+  const t=await r.text();
+  const j=JSON.parse(t.substring(t.indexOf('{'),t.lastIndexOf('}')+1));
+  const rows=(j.table&&j.table.rows)||[];
+  const m=rows.map((row,i)=>{
+   const c=row.c||[];
+   const v=k=>(c[k]&&c[k].v!==undefined&&c[k].v!==null)?String(c[k].v).trim():'';
+   return{id:i+1,emoji:v(4)||'🛒',name:v(0),desc:'',price:parseInt(v(1),10)||0,unit:v(2)||''};
+  }).filter(x=>x.name&&x.price>0);
+  if(m.length){MENU=m;renderMenu()}
+ }catch(e){}
+}
+const cart={};
+const rp=n=>'Rp'+n.toLocaleString('id-ID');
+function renderMenu(){
+ const sec=document.getElementById('menuSec');
+ sec.innerHTML=MENU.map(it=>
+  '<div class="b-item"><div class="b-emoji">'+it.emoji+'</div>'+
+  '<div class="b-info"><h3>'+it.name+'</h3><p>'+(it.desc||'')+'</p>'+
+  '<div class="b-price">'+rp(it.price)+(it.unit?' /'+it.unit:'')+'</div></div>'+
+  '<div class="stepper"><button onclick="chg('+it.id+',-1)">−</button><span id="q'+it.id+'">0</span><button onclick="chg('+it.id+',1)">+</button></div></div>'
+ ).join('');
+}
+function chg(id,d){
+ cart[id]=Math.max(0,(cart[id]||0)+d);
+ document.getElementById('q'+id).textContent=cart[id];
+ updateBar();
+}
+function updateBar(){
+ let n=0,t=0;
+ for(const id in cart){const it=MENU.find(m=>m.id==id);n+=cart[id];t+=cart[id]*it.price}
+ document.getElementById('cartCount').textContent=n;
+ document.getElementById('cartTotal').textContent=rp(t);
+ document.getElementById('cartbar').classList.toggle('show',n>0);
+}
+function openCheckout(){
+ let h='',t=0;
+ for(const id in cart){if(!cart[id])continue;const it=MENU.find(m=>m.id==id);h+='<div>'+cart[id]+'× '+it.name+' — '+rp(cart[id]*it.price)+'</div>';t+=cart[id]*it.price}
+ document.getElementById('checkoutItems').innerHTML=h;
+ document.getElementById('checkoutTotal').textContent=rp(t);
+ document.getElementById('checkoutModal').classList.add('show');
+}
+function closeCheckout(){document.getElementById('checkoutModal').classList.remove('show')}
+function placeOrder(){
+ const nm=document.getElementById('buyerName').value.trim()||'(tanpa nama)';
+ const nt=document.getElementById('buyerNote').value.trim();
+ let msg='Halo! Saya mau pesan:%0A%0A',t=0;
+ for(const id in cart){if(!cart[id])continue;const it=MENU.find(m=>m.id==id);msg+='• '+cart[id]+'× '+it.name+(it.unit?' /'+it.unit:'')+' ('+rp(cart[id]*it.price)+')%0A';t+=cart[id]*it.price}
+ msg+='%0ATotal: '+rp(t)+'%0ANama: '+encodeURIComponent(nm);
+ if(nt)msg+='%0ACatatan: '+encodeURIComponent(nt);
+ window.open('https://wa.me/'+WA_NUMBER+'?text='+msg,'_blank');
+}
+renderMenu();loadMenu();
+</script>
+</body>
+</html>
