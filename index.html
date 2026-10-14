@@ -76,6 +76,8 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#1b2b1b;c
     <input id="buyerName" placeholder="cth: Budi">
     <label>Alamat lengkap</label>
     <input id="buyerAddr" placeholder="cth: Jl. Raya Kibin No.10, patokan masjid">
+    <button id="gpsBtn" onclick="getGPS()" style="width:100%;padding:12px;border:2px dashed #2e7d32;background:#fff;border-radius:12px;font-weight:700;font-size:14px;color:#2e7d32;cursor:pointer;margin-top:6px">📍 Gunakan Lokasi Saya (GPS)</button>
+    <p id="gpsStatus" style="font-size:12px;margin-top:6px;color:#666"></p>
     <label>Catatan (opsional)</label>
     <input id="buyerNote" placeholder="cth: dus minyak 2, beras 1 karung">
     <button class="orderbtn" onclick="placeOrder()">📲 Kirim Pesanan via WhatsApp</button>
@@ -109,6 +111,7 @@ async function loadMenu(){
  }catch(e){}
 }
 const cart={};
+let buyerCoords=null;
 const rp=n=>'Rp'+n.toLocaleString('id-ID');
 function renderMenu(){
  const sec=document.getElementById('menuSec');
@@ -146,8 +149,19 @@ function placeOrder(){
  let msg='Halo! Saya mau pesan:%0A%0A',t=0;
  for(const id in cart){if(!cart[id])continue;const it=MENU.find(m=>m.id==id);msg+='• '+cart[id]+'× '+it.name+(it.unit?' /'+it.unit:'')+' ('+rp(cart[id]*it.price)+')%0A';t+=cart[id]*it.price}
  msg+='%0ATotal: '+rp(t)+'%0ANama: '+encodeURIComponent(nm)+'%0AAlamat: '+encodeURIComponent(al);
+ if(buyerCoords)msg+='%0ALokasi: https://maps.google.com/?q='+buyerCoords;
  if(nt)msg+='%0ACatatan: '+encodeURIComponent(nt);
  window.open('https://wa.me/'+WA_NUMBER+'?text='+msg,'_blank');
+}
+function getGPS(){
+ const s=document.getElementById('gpsStatus'),b=document.getElementById('gpsBtn');
+ if(!navigator.geolocation){s.textContent='GPS tidak didukung HP ini.';return}
+ s.textContent='Mengambil lokasi...';b.disabled=true;
+ navigator.geolocation.getCurrentPosition(p=>{
+  buyerCoords=p.coords.latitude.toFixed(6)+','+p.coords.longitude.toFixed(6);
+  s.textContent='✅ Lokasi terkunci!';
+  b.textContent='✅ Lokasi Terkunci';b.style.borderStyle='solid';b.style.background='#e8f5e9';
+ },e=>{s.textContent='Gagal ambil lokasi. Ketik alamat manual aja.';b.disabled=false},{timeout:15000});
 }
 renderMenu();loadMenu();
 </script>
