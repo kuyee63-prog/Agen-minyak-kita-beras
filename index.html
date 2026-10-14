@@ -50,6 +50,16 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#1b2b1b;c
     <div id="menuSec"></div>
   </div>
   <p class="note">Harga dapat berubah sewaktu-waktu.<br>Pesan via WhatsApp 👇</p>
+  <div class="b-sec">
+    <h2>📍 Area Layanan</h2>
+    <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(46,125,50,.1);margin-bottom:10px">
+      <iframe src="https://maps.google.com/maps?q=Kibin,Serang,Banten,Indonesia&z=11&output=embed" width="100%" height="250" style="border:0" loading="lazy"></iframe>
+      <div style="padding:12px;font-size:13px;color:#111">
+        <b>🚚 Melayani seluruh Kabupaten Serang</b><br>
+        <span style="color:#666">Kibin • Cikande • Kragilan • Ciruas • Pontang • Tunjung Teja • dan sekitarnya</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="cartbar" id="cartbar">
@@ -64,8 +74,10 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#1b2b1b;c
     <div style="font-weight:800;font-size:16px;margin-bottom:6px;color:#111">Total: <span id="checkoutTotal" style="color:#c62828"></span></div>
     <label>Nama kamu</label>
     <input id="buyerName" placeholder="cth: Budi">
+    <label>Alamat lengkap</label>
+    <input id="buyerAddr" placeholder="cth: Jl. Raya Kibin No.10, patokan masjid">
     <label>Catatan (opsional)</label>
-    <input id="buyerNote" placeholder="cth: antar ke rumah">
+    <input id="buyerNote" placeholder="cth: dus minyak 2, beras 1 karung">
     <button class="orderbtn" onclick="placeOrder()">📲 Kirim Pesanan via WhatsApp</button>
     <button onclick="closeCheckout()" style="width:100%;background:none;border:none;padding:12px;color:#888;font-size:14px;cursor:pointer">← Kembali</button>
   </div>
@@ -129,10 +141,11 @@ function openCheckout(){
 function closeCheckout(){document.getElementById('checkoutModal').classList.remove('show')}
 function placeOrder(){
  const nm=document.getElementById('buyerName').value.trim()||'(tanpa nama)';
+ const al=document.getElementById('buyerAddr').value.trim()||'(tanpa alamat)';
  const nt=document.getElementById('buyerNote').value.trim();
  let msg='Halo! Saya mau pesan:%0A%0A',t=0;
  for(const id in cart){if(!cart[id])continue;const it=MENU.find(m=>m.id==id);msg+='• '+cart[id]+'× '+it.name+(it.unit?' /'+it.unit:'')+' ('+rp(cart[id]*it.price)+')%0A';t+=cart[id]*it.price}
- msg+='%0ATotal: '+rp(t)+'%0ANama: '+encodeURIComponent(nm);
+ msg+='%0ATotal: '+rp(t)+'%0ANama: '+encodeURIComponent(nm)+'%0AAlamat: '+encodeURIComponent(al);
  if(nt)msg+='%0ACatatan: '+encodeURIComponent(nt);
  window.open('https://wa.me/'+WA_NUMBER+'?text='+msg,'_blank');
 }
